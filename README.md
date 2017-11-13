@@ -2,9 +2,9 @@
 
 # Firmware for BigClown Wireless CO2 monitor Kit
 
-[![Travis](https://img.shields.io/travis/bigclownlabs/bcf-kit-wireless-climate-monitor/master.svg)](https://travis-ci.org/bigclownlabs/bcf-kit-wireless-climate-monitor)
-[![Release](https://img.shields.io/github/release/bigclownlabs/bcf-kit-wireless-climate-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-wireless-climate-monitor/releases)
-[![License](https://img.shields.io/github/license/bigclownlabs/bcf-kit-wireless-climate-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-wireless-climate-monitor/blob/master/LICENSE)
+[![Travis](https://img.shields.io/travis/bigclownlabs/bcf-kit-wireless-co2-monitor/master.svg)](https://travis-ci.org/bigclownlabs/bcf-kit-wireless-co2-monitor)
+[![Release](https://img.shields.io/github/release/bigclownlabs/bcf-kit-wireless-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-wireless-co2-monitor/releases)
+[![License](https://img.shields.io/github/license/bigclownlabs/bcf-kit-wireless-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-wireless-co2-monitor/blob/master/LICENSE)
 [![Twitter](https://img.shields.io/twitter/follow/BigClownLabs.svg?style=social&label=Follow)](https://twitter.com/BigClownLabs)
 
 This repository contains firmware for co2 monitor

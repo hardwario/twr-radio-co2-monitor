@@ -1,30 +1,36 @@
 #include <application.h>
 
+#define SERVICE_INTERVAL_INTERVAL (60 * 60 * 1000)
 #define BATTERY_UPDATE_INTERVAL (60 * 60 * 1000)
-
-#define UPDATE_INTERVAL (1 * 1000)
 
 #define TEMPERATURE_TAG_PUB_NO_CHANGE_INTEVAL (15 * 60 * 1000)
 #define TEMPERATURE_TAG_PUB_VALUE_CHANGE 0.2f
-#define TEMPERATURE_UPDATE_INTERVAL (1 * 1000)
+#define TEMPERATURE_UPDATE_SERVICE_INTERVAL (5 * 1000)
+#define TEMPERATURE_UPDATE_NORMAL_INTERVAL (10 * 1000)
 
 #define HUMIDITY_TAG_PUB_NO_CHANGE_INTEVAL (15 * 60 * 1000)
 #define HUMIDITY_TAG_PUB_VALUE_CHANGE 5.0f
-#define HUMIDITY_TAG_UPDATE_INTERVAL (1 * 1000)
+#define HUMIDITY_TAG_UPDATE_SERVICE_INTERVAL (5 * 1000)
+#define HUMIDITY_TAG_UPDATE_NORMAL_INTERVAL (10 * 1000)
 
 #define BAROMETER_TAG_PUB_NO_CHANGE_INTEVAL (15 * 60 * 1000)
 #define BAROMETER_TAG_PUB_VALUE_CHANGE 20.0f
-#define BAROMETER_TAG_UPDATE_INTERVAL (1 * 1000)
+#define BAROMETER_TAG_UPDATE_SERVICE_INTERVAL (1 * 60 * 1000)
+#define BAROMETER_TAG_UPDATE_NORMAL_INTERVAL  (5 * 60 * 1000)
 
-#define CO2_PUB_NO_CHANGE_INTERVAL (5 * 60 * 1000)
+#define CO2_PUB_NO_CHANGE_INTERVAL (15 * 60 * 1000)
 #define CO2_PUB_VALUE_CHANGE 50.0f
-#define CO2_UPDATE_INTERVAL (1 * 60 * 1000)
+#define CO2_UPDATE_SERVICE_INTERVAL (1 * 60 * 1000)
+#define CO2_UPDATE_NORMAL_INTERVAL  (5 * 60 * 1000)
 
 // LED instance
 bc_led_t led;
 
 // Button instance
 bc_button_t button;
+
+// Thermometer instance
+bc_tmp112_t tmp112;
 
 // Temperature tag instance
 bc_tag_temperature_t temperature;
@@ -74,7 +80,7 @@ void temperature_tag_event_handler(bc_tag_temperature_t *self, bc_tag_temperatur
     {
         if (bc_tag_temperature_get_temperature_celsius(self, &value))
         {
-            if ((fabs(value - param->value) >= TEMPERATURE_TAG_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()))
+            if ((fabsf(value - param->value) >= TEMPERATURE_TAG_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()))
             {
                 bc_radio_pub_temperature(param->channel, &value);
                 param->value = value;
@@ -96,7 +102,7 @@ void humidity_tag_event_handler(bc_tag_humidity_t *self, bc_tag_humidity_event_t
 
     if (bc_tag_humidity_get_humidity_percentage(self, &value))
     {
-        if ((fabs(value - param->value) >= HUMIDITY_TAG_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()))
+        if ((fabsf(value - param->value) >= HUMIDITY_TAG_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()))
         {
             bc_radio_pub_humidity(param->channel, &value);
             param->value = value;
@@ -122,7 +128,7 @@ void barometer_tag_event_handler(bc_tag_barometer_t *self, bc_tag_barometer_even
         return;
     }
 
-    if ((fabs(pascal - param->value) >= BAROMETER_TAG_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()))
+    if ((fabsf(pascal - param->value) >= BAROMETER_TAG_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()))
     {
 
         if (!bc_tag_barometer_get_altitude_meter(self, &meter))
@@ -145,7 +151,7 @@ void co2_event_handler(bc_module_co2_event_t event, void *event_param)
     {
         if (bc_module_co2_get_concentration_ppm(&value))
         {
-            if ((fabs(value - param->value) >= CO2_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()))
+            if ((fabsf(value - param->value) >= CO2_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()))
             {
                 bc_radio_pub_co2(&value);
                 param->value = value;
@@ -155,6 +161,19 @@ void co2_event_handler(bc_module_co2_event_t event, void *event_param)
     }
 }
 
+void switch_to_normal_mode_task(void *param)
+{
+    bc_tag_temperature_set_update_interval(&temperature, TEMPERATURE_UPDATE_NORMAL_INTERVAL);
+
+    bc_tag_humidity_set_update_interval(&humidity, HUMIDITY_TAG_UPDATE_NORMAL_INTERVAL);
+
+    bc_tag_barometer_set_update_interval(&barometer, BAROMETER_TAG_UPDATE_NORMAL_INTERVAL);
+
+    bc_module_co2_set_update_interval(CO2_UPDATE_NORMAL_INTERVAL);
+
+    bc_scheduler_unregister(bc_scheduler_get_current_task_id());
+}
+
 void application_init(void)
 {
     // Initialize LED
@@ -162,6 +181,9 @@ void application_init(void)
     bc_led_set_mode(&led, BC_LED_MODE_OFF);
 
     bc_radio_init(BC_RADIO_MODE_NODE_SLEEPING);
+
+    // Initialize thermometer sensor on core module
+    bc_tmp112_init(&tmp112, BC_I2C_I2C0, 0x49);
 
     // Initialize button
     bc_button_init(&button, BC_GPIO_BUTTON, BC_GPIO_PULL_DOWN, false);
@@ -175,27 +197,29 @@ void application_init(void)
     // Initialize temperature
     temperature_event_param.channel = BC_RADIO_PUB_CHANNEL_R1_I2C0_ADDRESS_DEFAULT;
     bc_tag_temperature_init(&temperature, BC_I2C_I2C0, BC_TAG_TEMPERATURE_I2C_ADDRESS_DEFAULT);
-    bc_tag_temperature_set_update_interval(&temperature, TEMPERATURE_UPDATE_INTERVAL);
+    bc_tag_temperature_set_update_interval(&temperature, TEMPERATURE_UPDATE_SERVICE_INTERVAL);
     bc_tag_temperature_set_event_handler(&temperature, temperature_tag_event_handler, &temperature_event_param);
 
     // Initialize humidity
     humidity_event_param.channel = BC_RADIO_PUB_CHANNEL_R3_I2C0_ADDRESS_DEFAULT;
     bc_tag_humidity_init(&humidity, BC_TAG_HUMIDITY_REVISION_R3, BC_I2C_I2C0, BC_TAG_HUMIDITY_I2C_ADDRESS_DEFAULT);
-    bc_tag_humidity_set_update_interval(&humidity, HUMIDITY_TAG_UPDATE_INTERVAL);
+    bc_tag_humidity_set_update_interval(&humidity, HUMIDITY_TAG_UPDATE_SERVICE_INTERVAL);
     bc_tag_humidity_set_event_handler(&humidity, humidity_tag_event_handler, &humidity_event_param);
 
     // Initialize barometer
     barometer_event_param.channel = BC_RADIO_PUB_CHANNEL_R1_I2C0_ADDRESS_DEFAULT;
     bc_tag_barometer_init(&barometer, BC_I2C_I2C0);
-    bc_tag_barometer_set_update_interval(&barometer, BAROMETER_TAG_UPDATE_INTERVAL);
+    bc_tag_barometer_set_update_interval(&barometer, BAROMETER_TAG_UPDATE_SERVICE_INTERVAL);
     bc_tag_barometer_set_event_handler(&barometer, barometer_tag_event_handler, &barometer_event_param);
 
     // Initialize CO2
     bc_module_co2_init();
-    bc_module_co2_set_update_interval(CO2_UPDATE_INTERVAL);
+    bc_module_co2_set_update_interval(CO2_UPDATE_SERVICE_INTERVAL);
     bc_module_co2_set_event_handler(co2_event_handler, &co2_event_param);
 
     bc_radio_pairing_request("kit-co2-monitor", VERSION);
+
+    bc_scheduler_register(switch_to_normal_mode_task, NULL, SERVICE_INTERVAL_INTERVAL);
 
     bc_led_pulse(&led, 2000);
 }

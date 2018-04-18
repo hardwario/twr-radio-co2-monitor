@@ -23,6 +23,8 @@
 #define CO2_UPDATE_SERVICE_INTERVAL (1 * 60 * 1000)
 #define CO2_UPDATE_NORMAL_INTERVAL  (5 * 60 * 1000)
 
+#define CALIBRATION_DELAY (10 * 60 * 1000)
+
 // LED instance
 bc_led_t led;
 
@@ -47,6 +49,17 @@ event_param_t barometer_event_param = { .next_pub = 0 };
 // CO2
 event_param_t co2_event_param = { .next_pub = 0 };
 
+void calibration_task(void *param)
+{
+    (void) param;
+
+    bc_led_set_mode(&led, BC_LED_MODE_OFF);
+
+    bc_module_co2_calibration(BC_LP8_CALIBRATION_BACKGROUND_FILTERED);
+
+    bc_scheduler_unregister(bc_scheduler_get_current_task_id());
+}
+
 void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
 {
     (void) self;
@@ -55,6 +68,12 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
     if (event == BC_BUTTON_EVENT_PRESS)
     {
         bc_led_pulse(&led, 100);
+    }
+    else if (event == BC_BUTTON_EVENT_HOLD)
+    {
+        bc_led_set_mode(&led, BC_LED_MODE_BLINK);
+
+        bc_scheduler_register(calibration_task, NULL, bc_tick_get() + CALIBRATION_DELAY);
     }
 }
 
@@ -110,7 +129,6 @@ void humidity_tag_event_handler(bc_tag_humidity_t *self, bc_tag_humidity_event_t
         }
     }
 }
-
 
 void barometer_tag_event_handler(bc_tag_barometer_t *self, bc_tag_barometer_event_t event, void *event_param)
 {
@@ -187,6 +205,7 @@ void application_init(void)
 
     // Initialize button
     bc_button_init(&button, BC_GPIO_BUTTON, BC_GPIO_PULL_DOWN, false);
+    bc_button_set_hold_time(&button, 10000);
     bc_button_set_event_handler(&button, button_event_handler, NULL);
 
     // Initialize battery

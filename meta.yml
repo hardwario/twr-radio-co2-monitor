@@ -1,6 +1,11 @@
 article: https://www.bigclown.com/doc/projects/wireless-co2-monitor/
 assembly:
-  - name: BigClown Button Module
   - name: BigClown CO2 Module
   - name: BigClown Core Module
   - name: BigClown Battery Module
+  - name: BigClown Temperature Tag
+    optional: true
+  - name: BigClown Humidity Tag
+    optional: true
+  - name: BigClown Barometer Tag
+    optional: true

@@ -1,14 +1,15 @@
 <a href="https://www.bigclown.com/"><img src="https://bigclown.sirv.com/logo.png" width="200" alt="BigClown Logo" align="right"></a>
 
-# Firmware for BigClown Wireless CO2 monitor Kit
+# Firmware for BigClown Radio CO2 monitor
 
-[![Travis](https://img.shields.io/travis/bigclownlabs/bcf-kit-wireless-co2-monitor/master.svg)](https://travis-ci.org/bigclownlabs/bcf-kit-wireless-co2-monitor)
-[![Release](https://img.shields.io/github/release/bigclownlabs/bcf-kit-wireless-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-wireless-co2-monitor/releases)
-[![License](https://img.shields.io/github/license/bigclownlabs/bcf-kit-wireless-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-kit-wireless-co2-monitor/blob/master/LICENSE)
+[![Travis](https://img.shields.io/travis/bigclownlabs/bcf-radio-co2-monitor/master.svg)](https://travis-ci.org/bigclownlabs/bcf-radio-co2-monitor)
+[![Release](https://img.shields.io/github/release/bigclownlabs/bcf-radio-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-radio-co2-monitor/releases)
+[![License](https://img.shields.io/github/license/bigclownlabs/bcf-radio-co2-monitor.svg)](https://github.com/bigclownlabs/bcf-radio-co2-monitor/blob/master/LICENSE)
 [![Twitter](https://img.shields.io/twitter/follow/BigClownLabs.svg?style=social&label=Follow)](https://twitter.com/BigClownLabs)
 
-This repository contains firmware for co2 monitor
+See the project documentation on this link:
 
+**https://www.bigclown.com/doc/projects/radio-co2-monitor/**
 
 ## License
 

@@ -211,7 +211,7 @@ void application_init(void)
     bc_button_set_event_handler(&button, button_event_handler, NULL);
 
     // Initialize battery
-    bc_module_battery_init(BC_MODULE_BATTERY_FORMAT_STANDARD);
+    bc_module_battery_init();
     bc_module_battery_set_event_handler(battery_event_handler, NULL);
     bc_module_battery_set_update_interval(BATTERY_UPDATE_INTERVAL);
 
@@ -238,7 +238,7 @@ void application_init(void)
     bc_module_co2_set_update_interval(CO2_UPDATE_SERVICE_INTERVAL);
     bc_module_co2_set_event_handler(co2_event_handler, &co2_event_param);
 
-    bc_radio_pairing_request("kit-co2-monitor", VERSION);
+    bc_radio_pairing_request("co2-monitor", VERSION);
 
     bc_scheduler_register(switch_to_normal_mode_task, NULL, SERVICE_INTERVAL_INTERVAL);
 

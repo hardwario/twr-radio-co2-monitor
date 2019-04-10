@@ -51,11 +51,14 @@ event_param_t barometer_event_param = { .next_pub = 0 };
 event_param_t co2_event_param = { .next_pub = 0 };
 
 bc_scheduler_task_id_t calibration_task_id = 0;
+int calibration_counter;
 
 void calibration_task(void *param);
 
 void calibration_start()
 {
+    calibration_counter = 32;
+
     bc_led_set_mode(&led, BC_LED_MODE_BLINK_FAST);
     calibration_task_id = bc_scheduler_register(calibration_task, NULL, bc_tick_get() + CALIBRATION_DELAY);
     bc_radio_pub_string("co2-meter/-/calibration", "start");
@@ -74,20 +77,18 @@ void calibration_stop()
 void calibration_task(void *param)
 {
     (void) param;
-    static int _calibration_counter = 32;
 
     bc_led_set_mode(&led, BC_LED_MODE_BLINK_SLOW);
 
-    bc_radio_pub_int("co2-meter/-/calibration", &_calibration_counter);
+    bc_radio_pub_int("co2-meter/-/calibration", &calibration_counter);
 
     bc_module_co2_set_update_interval(CO2_UPDATE_SERVICE_INTERVAL);
     bc_module_co2_calibration(BC_LP8_CALIBRATION_BACKGROUND_FILTERED);
 
-    _calibration_counter--;
+    calibration_counter--;
 
-    if (_calibration_counter == 0)
+    if (calibration_counter == 0)
     {
-        _calibration_counter = 32;
         calibration_stop();
     }
 

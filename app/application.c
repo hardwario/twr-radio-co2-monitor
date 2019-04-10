@@ -50,7 +50,26 @@ event_param_t barometer_event_param = { .next_pub = 0 };
 // CO2
 event_param_t co2_event_param = { .next_pub = 0 };
 
-bool _calibration = false;
+bc_scheduler_task_id_t calibration_task_id = 0;
+
+void calibration_task(void *param);
+
+void calibration_start()
+{
+    bc_led_set_mode(&led, BC_LED_MODE_BLINK_FAST);
+    calibration_task_id = bc_scheduler_register(calibration_task, NULL, bc_tick_get() + CALIBRATION_DELAY);
+    bc_radio_pub_string("co2-meter/-/calibration", "start");
+}
+
+void calibration_stop()
+{
+    bc_led_set_mode(&led, BC_LED_MODE_OFF);
+    bc_scheduler_unregister(calibration_task_id);
+    calibration_task_id = 0;
+
+    bc_module_co2_set_update_interval(CO2_UPDATE_NORMAL_INTERVAL);
+    bc_radio_pub_string("co2-meter/-/calibration", "end");
+}
 
 void calibration_task(void *param)
 {
@@ -69,17 +88,10 @@ void calibration_task(void *param)
     if (_calibration_counter == 0)
     {
         _calibration_counter = 32;
-
-        bc_led_set_mode(&led, BC_LED_MODE_OFF);
-        bc_scheduler_unregister(bc_scheduler_get_current_task_id());
-        bc_module_co2_set_update_interval(CO2_UPDATE_NORMAL_INTERVAL);
-
-        bc_radio_pub_string("co2-meter/-/calibration", "end");
-        _calibration = false;
+        calibration_stop();
     }
 
     bc_scheduler_plan_current_relative(CALIBRATION_INTERVAL);
-
 }
 
 void button_event_handler(bc_button_t *self, bc_button_event_t event, void *event_param)
@@ -98,12 +110,15 @@ void button_event_handler(bc_button_t *self, bc_button_event_t event, void *even
     }
     else if (event == BC_BUTTON_EVENT_HOLD)
     {
-        bc_led_set_mode(&led, BC_LED_MODE_BLINK_FAST);
+        if (!calibration_task_id)
+        {
+            calibration_start();
+        }
+        else
+        {
+            calibration_stop();
+        }
 
-        bc_scheduler_register(calibration_task, NULL, bc_tick_get() + CALIBRATION_DELAY);
-        _calibration = true;
-
-        bc_radio_pub_string("co2-meter/-/calibration", "start");
     }
 }
 
@@ -210,7 +225,7 @@ void co2_event_handler(bc_module_co2_event_t event, void *event_param)
     {
         if (bc_module_co2_get_concentration_ppm(&value))
         {
-            if ((fabsf(value - param->value) >= CO2_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()) || _calibration)
+            if ((fabsf(value - param->value) >= CO2_PUB_VALUE_CHANGE) || (param->next_pub < bc_scheduler_get_spin_tick()) || calibration_task_id)
             {
                 bc_radio_pub_co2(&value);
                 param->value = value;

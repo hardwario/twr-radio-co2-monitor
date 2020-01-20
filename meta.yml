@@ -2,13 +2,13 @@ article: https://www.bigclown.com/doc/projects/radio-co2-monitor/
 video: https://youtu.be/jGxjl5v7kqE
 images:
   - title:
-    url: https://www.bigclown.com/kits/co2-monitor/main.png
+    url: https://cdn.myshoptet.com/usr/shop.hardwario.com/user/shop/category_portrait/162-2_co2-monitor-kit-a1.jpg?5de56e1c
 articles:
   - title: Radio CO2 Monitor
     url: https://www.hackster.io/jakub-smejkal/radio-co2-monitor-311d2c
     description: Monitor your workspace or your home with this simple solution that sends all the data by radio so you can work with them.
     images:
-      - url: https://hackster.imgix.net/uploads/attachments/915463/co2-monitor_LBbhxfeFB9.png?auto=compress%2Cformat&w=900&h=675&fit=min
+      - url: https://hackster.imgix.net/uploads/attachments/1050366/_TtbY6sZnSM.blob?auto=compress%2Cformat&w=900&h=675&fit=min
 assembly:
   - name: BigClown CO2 Module
   - name: BigClown Core Module

@@ -9,7 +9,7 @@
 
 See the project documentation on this link:
 
-**https://www.bigclown.com/doc/projects/radio-co2-monitor/**
+**https://developers.hardwario.com/projects/radio-co2-monitor/**
 
 ## License
 

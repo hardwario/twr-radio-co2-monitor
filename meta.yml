@@ -1,8 +1,8 @@
-article: https://www.bigclown.com/doc/projects/radio-co2-monitor/
+article: https://developers.hardwario.com/projects/radio-co2-monitor
 video: https://youtu.be/jGxjl5v7kqE
 images:
   - title:
-    url: https://github.com/hardwario/website/blob/master/static/kits-images/co2-monitor/main.png
+    url: https://raw.githubusercontent.com/hardwario/website/master/static/kits-images/co2-monitor/main.png
 articles:
   - title: Radio CO2 Monitor
     url: https://www.hackster.io/jakub-smejkal/radio-co2-monitor-311d2c

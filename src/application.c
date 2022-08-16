@@ -293,7 +293,7 @@ void application_init(void)
     twr_module_co2_set_update_interval(CO2_UPDATE_SERVICE_INTERVAL);
     twr_module_co2_set_event_handler(co2_event_handler, &co2_event_param);
 
-    twr_radio_pairing_request("co2-monitor", VERSION);
+    twr_radio_pairing_request("co2-monitor", FW_VERSION);
 
     twr_scheduler_register(switch_to_normal_mode_task, NULL, SERVICE_INTERVAL_INTERVAL);
 
